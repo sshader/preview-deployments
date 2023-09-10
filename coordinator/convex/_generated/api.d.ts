@@ -14,6 +14,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as crons from "../crons";
 import type * as deployments from "../deployments";
 import type * as http from "../http";
 
@@ -26,6 +27,7 @@ import type * as http from "../http";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   deployments: typeof deployments;
   http: typeof http;
 }>;

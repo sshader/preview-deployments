@@ -12,9 +12,11 @@ http.route({
     if (sk !== process.env.SECRET_KEY) {
       return new Response("Invalid secret key", { status: 403 });
     }
-    const body: { identifier: string } = await request.json();
+    const body: { identifier: string; previewUrl: string } =
+      await request.json();
     const result = await ctx.runMutation(internal.deployments.claim, {
       identifier: body.identifier,
+      previewUrl: `https://${body.previewUrl}`,
     });
     if (result === null) {
       return new Response("no instance available", { status: 400 });

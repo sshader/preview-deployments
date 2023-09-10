@@ -12,13 +12,23 @@ function PreviewDeployment({
     deploymentName: string;
     identifier: string | null;
     lastUpdatedTime: number;
+    dashboardUrl: string;
+    previewUrl: string | null;
   };
 }) {
   const reset = useMutation(api.deployments.reset);
   return (
     <tr>
-      <td>{deployment.deploymentName}</td>
-      <td>{deployment.identifier}</td>
+      <td>
+        <a href={deployment.dashboardUrl} target="_blank">
+          {deployment.deploymentName}
+        </a>
+      </td>
+      <td>
+        <a href={deployment.previewUrl!} target="_blank">
+          {deployment.identifier}
+        </a>
+      </td>
       <td>{new Date(deployment.lastUpdatedTime).toLocaleString()}</td>
       <td>
         <button onClick={() => void reset({ id: deployment._id })}>
@@ -33,6 +43,7 @@ function AddNew() {
   const [deploymentName, setDeploymentName] = useState("");
   const [deploymentKey, setDeploymentKey] = useState("");
   const [deploymentSecret, setDeploymentSecret] = useState("");
+  const [dashboardUrl, setDashboardUrl] = useState("");
 
   const addNew = useMutation(api.deployments.add);
   const handleClick = async () => {
@@ -40,10 +51,12 @@ function AddNew() {
       deploymentKey,
       deploymentName,
       deploymentSecret,
+      dashboardUrl,
     });
     setDeploymentName("");
     setDeploymentKey("");
     setDeploymentSecret("");
+    setDashboardUrl("");
   };
 
   return (
@@ -63,6 +76,11 @@ function AddNew() {
         value={deploymentSecret}
         onChange={(event) => setDeploymentSecret(event.target.value)}
       ></input>
+      <input
+        placeholder={"Dashboard URL..."}
+        value={dashboardUrl}
+        onChange={(event) => setDashboardUrl(event.target.value)}
+      ></input>
       <button onClick={() => void handleClick()}>Add new deployment</button>
     </div>
   );
@@ -80,7 +98,7 @@ function App() {
       <h1>{`Free preview deployments: ${deployments.unclaimed.length}`}</h1>
       <div>
         <h1>{`Claimed preview deployments: ${deployments.claimed.length}`}</h1>
-        <table>
+        <table style={{ width: "80vw" }}>
           <tr>
             <th>Deployment name</th>
             <th>Branch name</th>

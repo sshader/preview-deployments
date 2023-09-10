@@ -24,14 +24,16 @@ const makeConvexRequest = async (args: {
 
 const buildForPreview = async () => {
   console.info("Claiming deployment");
-  const claimDeploymentArgs = {
-    identifier: process.env.VERCEL_GIT_COMMIT_REF,
-    hash: process.env.VERCEL_GIT_COMMIT_SHA,
-  };
+  const identifier = process.env.VERCEL_GIT_COMMIT_REF;
+  const hash = process.env.VERCEL_GIT_COMMIT_SHA;
+  const previewUrl = process.env.VERCEL_BRANCH_URL;
   const claimResponse = await makeConvexRequest({
     deploymentName: process.env.CONVEX_COORDINATOR_DEPLOYMENT_NAME!,
     deploymentSecret: process.env.CONVEX_COORDINATOR_SECRET_KEY!,
-    body: claimDeploymentArgs,
+    body: {
+      identifier,
+      previewUrl,
+    },
     endpoint: "claim",
   });
 
@@ -47,7 +49,7 @@ const buildForPreview = async () => {
   await makeConvexRequest({
     deploymentName,
     deploymentSecret,
-    body: claimDeploymentArgs,
+    body: { identifier, hash },
     endpoint: "setup",
   });
 
@@ -60,7 +62,7 @@ const buildForPreview = async () => {
   await makeConvexRequest({
     deploymentName,
     deploymentSecret,
-    body: claimDeploymentArgs,
+    body: {},
     endpoint: "seed",
   });
 

@@ -6,7 +6,11 @@ export default defineSchema({
     deploymentName: v.string(),
     deploymentKey: v.string(),
     deploymentSecret: v.string(),
+    dashboardUrl: v.string(),
+
     identifier: v.union(v.null(), v.string()),
+    previewUrl: v.union(v.null(), v.string()),
+
     lastUpdatedTime: v.number(),
   }),
 });

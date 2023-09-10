@@ -12,6 +12,7 @@ import { Id } from "./_generated/dataModel";
 export const claim = internalMutation({
   args: {
     identifier: v.string(),
+    previewUrl: v.string(),
   },
   handler: async (ctx, args) => {
     const existingDeploymentOrNull = await ctx.db
@@ -20,6 +21,7 @@ export const claim = internalMutation({
       .unique();
     if (existingDeploymentOrNull !== null) {
       await ctx.db.patch(existingDeploymentOrNull._id, {
+        previewUrl: args.previewUrl,
         lastUpdatedTime: Date.now(),
       });
       return {
@@ -38,6 +40,7 @@ export const claim = internalMutation({
     }
     await ctx.db.patch(availableDeployment._id, {
       identifier: args.identifier,
+      previewUrl: args.previewUrl,
       lastUpdatedTime: Date.now(),
     });
     return {
@@ -75,6 +78,7 @@ export const markReset = internalMutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
       identifier: null,
+      previewUrl: null,
       lastUpdatedTime: Date.now(),
     });
   },
@@ -103,11 +107,13 @@ export const add = mutation({
     deploymentName: v.string(),
     deploymentKey: v.string(),
     deploymentSecret: v.string(),
+    dashboardUrl: v.string(),
   },
   handler: async (ctx, args) => {
     return ctx.db.insert("DeploymentInfo", {
       ...args,
       identifier: null,
+      previewUrl: null,
       lastUpdatedTime: Date.now(),
     });
   },
@@ -123,9 +129,14 @@ export const list = query({
     for (const deployment of deployments) {
       const redacted = {
         _id: deployment._id,
-        identifier: deployment.identifier,
-        lastUpdatedTime: deployment.lastUpdatedTime,
+
         deploymentName: deployment.deploymentName,
+        dashboardUrl: deployment.dashboardUrl,
+
+        identifier: deployment.identifier,
+        previewUrl: deployment.previewUrl,
+
+        lastUpdatedTime: deployment.lastUpdatedTime,
       };
       if (deployment.identifier === null) {
         unclaimed.push(redacted);

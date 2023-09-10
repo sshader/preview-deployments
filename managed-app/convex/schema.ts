@@ -1,5 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+
+// Table name can be changed as desired
 export const PreviewInfoTableName = "PreviewInfo";
 export const previewInfoDef = {
   [PreviewInfoTableName]: defineTable({
