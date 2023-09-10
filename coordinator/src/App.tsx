@@ -77,9 +77,9 @@ function App() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div>{`${deployments.unclaimed.length} free preview deployments`}</div>
+      <h1>{`Free preview deployments: ${deployments.unclaimed.length}`}</h1>
       <div>
-        <div>{`${deployments.claimed.length} claimed preview deployments`}</div>
+        <h1>{`Claimed preview deployments: ${deployments.claimed.length}`}</h1>
         <table>
           <tr>
             <th>Deployment name</th>
@@ -91,7 +91,10 @@ function App() {
           })}
         </table>
       </div>
-      <AddNew />
+      <div>
+        <h1>Add new preview deployment:</h1>
+        <AddNew />
+      </div>
     </div>
   );
 }

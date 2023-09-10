@@ -1,11 +1,13 @@
 import { v } from "convex/values";
 import {
+  MutationCtx,
   internalAction,
   internalMutation,
   mutation,
   query,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 export const claim = internalMutation({
   args: {
@@ -51,18 +53,22 @@ export const reset = mutation({
     id: v.id("DeploymentInfo"),
   },
   handler: async (ctx, args) => {
-    const instanceInfo = await ctx.db.get(args.id);
-    if (instanceInfo === null) {
-      throw new Error("Couldn't find InstanceInfo");
-    }
-    await ctx.scheduler.runAfter(0, internal.deployments.resetAction, {
-      id: args.id,
-      instanceName: instanceInfo.deploymentName,
-      deploymentKey: instanceInfo.deploymentKey,
-      deploymentSecret: instanceInfo.deploymentSecret,
-    });
+    return resetImpl(ctx, args.id);
   },
 });
+
+export const resetImpl = async (ctx: MutationCtx, id: Id<"DeploymentInfo">) => {
+  const instanceInfo = await ctx.db.get(id);
+  if (instanceInfo === null) {
+    throw new Error("Couldn't find InstanceInfo");
+  }
+  await ctx.scheduler.runAfter(0, internal.deployments.resetAction, {
+    id,
+    instanceName: instanceInfo.deploymentName,
+    deploymentKey: instanceInfo.deploymentKey,
+    deploymentSecret: instanceInfo.deploymentSecret,
+  });
+};
 
 export const markReset = internalMutation({
   args: { id: v.id("DeploymentInfo") },
@@ -131,5 +137,22 @@ export const list = query({
       claimed,
       unclaimed,
     };
+  },
+});
+
+export const maybeClear = internalMutation({
+  args: {},
+  handler: async (ctx, _args) => {
+    const unclaimed = await ctx.db
+      .query("DeploymentInfo")
+      .filter((q) => q.eq(q.field("identifier"), null))
+      .first();
+    if (unclaimed !== null) {
+      return;
+    }
+    const deployments = await ctx.db.query("DeploymentInfo").collect();
+    deployments.sort((a, b) => b.lastUpdatedTime - a.lastUpdatedTime);
+    const leastRecentlyUpdated = deployments[0];
+    return resetImpl(ctx, leastRecentlyUpdated._id);
   },
 });
